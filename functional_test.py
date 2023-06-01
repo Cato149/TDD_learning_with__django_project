@@ -19,7 +19,7 @@ class NewVisorTest(unittest.TestCase):
         self.browser.get('http://localhost:8000')
         
         # * Он видит, что заголовок и шапка говорят о списке дел (to-do)
-        self.assertIn('To-DO', self.browser.title)
+        self.assertIn('To-Do list', self.browser.title)
         self.fail('Закончить тест!')
         
         # * Он видит поле ввода новой задачи
