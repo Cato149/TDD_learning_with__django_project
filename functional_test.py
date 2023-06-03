@@ -43,7 +43,7 @@ class NewVisorTest(unittest.TestCase):
         table = self.browser.find_element(By.ID, 'id_list_table')
         rows = table.find_elements(By.TAG_NAME, 'tr')
         self.assertTrue(
-            any(row.text == '1: Купить молоко' for row in rows)
+            any(row.text == '1: Купить молоко' for row in rows), "Новый элемент не появился в таблице"
         )
         # Он добавляет еще пару задач
         self.fail('Закончить тест!')
