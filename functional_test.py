@@ -15,6 +15,11 @@ class NewVisorTest(unittest.TestCase):
     def tearDown(self):
         '''Демонотаж'''
         self.browser.quit()
+        
+    def check_for_row_in_list(self, row_text):
+        table = self.browser.find_element(By.ID, 'id_list_table')
+        rows = table.find_elements(By.TAG_NAME, 'tr')
+        self.assertIn('1: Купить молоко', [row.text for row in rows])
     
     def test_can_start_a_list_and_retrever_it_later(self):
         '''тест: тможно начать список и получить его позже'''
@@ -40,25 +45,20 @@ class NewVisorTest(unittest.TestCase):
         inputbox.send_keys(Keys.ENTER)
         time.sleep(1)
         
-        table = self.browser.find_element(By.ID, 'id_list_table')
-        rows = table.find_elements(By.TAG_NAME, 'tr')
 #        self.assertTrue(
 #            any(row.text == '1: Купить молоко' for row in rows), 
 #            "Новый элемент не появился в таблице. Содержимым было: " 
 #            f"{table.text}"
 #        )
-        self.assertIn('1: Купить молоко', [row.text for row in rows])
+        self.check_for_row_in_list('1: Купить молоко')
         # Он добавляет еще пару задач
         inputbox = self.browser.find_element(By.ID, 'id_new_item')
         inputbox.send_keys('Купить мясо')
         inputbox.send_keys(Keys.ENTER)
         time.sleep(1)
         # Страница обновившись показыват каждый новый элемент
-        table = self.browser.find_element(By.ID, 'id_list_table')
-        rows = table.find_elements(By.TAG_NAME, 'tr')
-        self.assertIn('1: Купить молоко', [row.text for row in rows])
-        self.assertIn('2: Купить мясо', [row.text for row in rows])
-
+        self.check_for_row_in_list('1: Купить молоко')
+        self.check_for_row_in_list('2: Купить мясо')
         # Мэт решает сохранить свой список. Он нажимает на кнопку и страница генерирует для него 
         # URL по которому он может получить доступ к своему списку откуда удобно
         self.fail('Закончить тест!')
