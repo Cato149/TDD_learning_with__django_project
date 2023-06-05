@@ -17,3 +17,9 @@ class HomePageTest(TestCase):
         self.assertTrue(html.endswith('</html>'))
         
         self.assertTemplateUsed(response, 'home.html')
+        
+    def test_can_save_a_POST_request(self):
+        '''Тест может сохранить POST запрос'''
+        responce = self.client.post('/', data={'item_text': 'A new list item'})
+        self.assertIn('A new list item', responce.content.decode())
+        self.assertTemplateUsed(responce, 'home.html')

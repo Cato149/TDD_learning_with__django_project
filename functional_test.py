@@ -42,16 +42,26 @@ class NewVisorTest(unittest.TestCase):
         
         table = self.browser.find_element(By.ID, 'id_list_table')
         rows = table.find_elements(By.TAG_NAME, 'tr')
-        self.assertTrue(
-            any(row.text == '1: Купить молоко' for row in rows), "Новый элемент не появился в таблице"
-        )
+#        self.assertTrue(
+#            any(row.text == '1: Купить молоко' for row in rows), 
+#            "Новый элемент не появился в таблице. Содержимым было: " 
+#            f"{table.text}"
+#        )
+        self.assertIn('1: Купить молоко', [row.text for row in rows])
         # Он добавляет еще пару задач
-        self.fail('Закончить тест!')
+        inputbox = self.browser.find_element(By.ID, 'id_new_item')
+        inputbox.send_keys('Купить мясо')
+        inputbox.send_keys(Keys.ENTER)
+        time.sleep(1)
         # Страница обновившись показыват каждый новый элемент
+        table = self.browser.find_element(By.ID, 'id_list_table')
+        rows = table.find_elements(By.TAG_NAME, 'tr')
+        self.assertIn('1: Купить молоко', [row.text for row in rows])
+        self.assertIn('2: Купить мясо', [row.text for row in rows])
 
         # Мэт решает сохранить свой список. Он нажимает на кнопку и страница генерирует для него 
         # URL по которому он может получить доступ к своему списку откуда удобно
-
+        self.fail('Закончить тест!')
         # Он переходит по ссылке и видит свой список 
 
         # Наконец сайт выдыхает, ведь этот душнила ушел
