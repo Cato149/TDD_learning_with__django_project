@@ -19,12 +19,6 @@ class HomePageTest(TestCase):
         
         self.assertTemplateUsed(response, 'home.html')
         
-    def test_can_save_a_POST_request(self):
-        '''Тест может сохранить POST запрос'''
-        responce = self.client.post('/', data={'item_text': 'A new list item'})
-        self.assertIn('A new list item', responce.content.decode())
-        self.assertTemplateUsed(responce, 'home.html')
-        
         
 class ItemModelTest(TestCase):
     '''тест модели элемента списка'''
@@ -46,3 +40,33 @@ class ItemModelTest(TestCase):
         self.assertEqual(first_saved_item.text, 'The first (ever) list item')
         self.assertEqual(second_saved_item.text, 'Item the second')
         
+    def test_homepage_can_save_POST_request(self):
+        '''тест может сохранять post-запрос'''
+        self.client.post('/', data={"item_text": "a new list item"})
+        
+        self.assertEqual(Item.objects.count(), 1)
+        new_item = Item.objects.first()
+        self.assertEqual(new_item.text, 'a new list item')
+        
+        
+    def test_redirect_after_POST(self):
+        '''тест перенаправляет после POST запроса'''
+        responce = self.client.post('/', data={"item_text": "a new list item"})
+        
+        self.assertEqual(responce.status_code, 302)
+        self.assertEqual(responce['location'], '/')
+        
+    def test_only_saves_item_when_necessary(self):
+        '''тест сохранает элементы только тогда, когда нужно'''
+        self.client.get('/')
+        self.assertEqual(Item.objects.count(), 0)
+        
+    def test_display_all_list_items(self):
+        '''тест отображает все элементы списка'''
+        Item.objects.create(text='itemey 1')
+        Item.objects.create(text='itemey 2')
+        
+        responce = self.client.get('/')
+        
+        self.assertIn('itemey 1', responce.content.decode())
+        self.assertIn('itemey 2', responce.content.decode())
