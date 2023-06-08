@@ -1,3 +1,4 @@
+from django.test import LiveServerTestCase
 import time
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -5,7 +6,7 @@ from selenium.webdriver.common.keys import Keys
 import unittest
 
 
-class NewVisorTest(unittest.TestCase):
+class NewVisorTest(LiveServerTestCase):
     '''тест нового посетителя'''
     
     def setUp(self):
@@ -24,7 +25,7 @@ class NewVisorTest(unittest.TestCase):
     def test_can_start_a_list_and_retrever_it_later(self):
         '''тест: тможно начать список и получить его позже'''
         #Мэту посоветоали новое крутое приложение для ведни списка дел
-        self.browser.get('http://localhost:8000')
+        self.browser.get(self.live_server_url)
         
         #Он видит, что заголовок и шапка говорят о списке дел (to-do)
         self.assertIn('To-Do list', self.browser.title)
