@@ -100,7 +100,7 @@ class NewVisorTest(LiveServerTestCase):
         self.browser.get(self.live_server_url)
         page_text = self.browser.find_element(By.TAG_NAME, 'body').text
         self.assertNotIn('Купить молоко', page_text)
-        self.assertNotIn('Купить ммясо', page_text) 
+        self.assertNotIn('Купить мясо', page_text) 
 
         # боб начинает новый список
         inputbox = self.browser.find_element(By.ID, 'id_new_item')

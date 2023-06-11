@@ -39,28 +39,8 @@ class ItemModelTest(TestCase):
         second_saved_item = saved_items[1]
         self.assertEqual(first_saved_item.text, 'The first (ever) list item')
         self.assertEqual(second_saved_item.text, 'Item the second')
-
-    def test_homepage_can_save_POST_request(self):
-        '''тест может сохранять post-запрос'''
-        self.client.post('/', data={"item_text": "a new list item"})
-
-        self.assertEqual(Item.objects.count(), 1)
-        new_item = Item.objects.first()
-        self.assertEqual(new_item.text, 'a new list item')
-
-    def test_redirect_after_POST(self):
-        '''тест перенаправляет после POST запроса'''
-        responce = self.client.post('/', data={"item_text": "a new list item"})
-
-        self.assertEqual(responce.status_code, 302)
-        self.assertEqual(responce['location'], '/lists/the-only-one-list/')
-
-    def test_only_saves_item_when_necessary(self):
-        '''тест сохранает элементы только тогда, когда нужно'''
-        self.client.get('/')
-        self.assertEqual(Item.objects.count(), 0)
-
-
+        
+        
 class LisViewTest(TestCase):
     '''тест предсавления списка'''
     
@@ -77,3 +57,23 @@ class LisViewTest(TestCase):
 
         self.assertContains(responce, 'itemey 1')
         self.assertContains(responce, 'itemey 2')
+        
+        
+class NewListTest(TestCase):
+    '''тест проверяет новые созданные списки'''
+
+    def test_redirect_after_POST(self):
+        '''тест перенаправляет после POST запроса'''
+        responce = self.client.post('/lists/new', data={"item_text": "a new list item"})
+
+#       self.assertEqual(responce.status_code, 302)
+#       self.assertRedirects(responce['location'], '/lists/the-only-one-list/')
+        self.assertRedirects(responce, '/lists/the-only-one-list/') #! <--- Заменяет две сткои выше
+
+    def test_homepage_can_save_POST_request(self):
+        '''тест может сохранять post-запрос'''
+        self.client.post('/lists/new', data={"item_text": "a new list item"})
+
+        self.assertEqual(Item.objects.count(), 1)
+        new_item = Item.objects.first()
+        self.assertEqual(new_item.text, 'a new list item')
