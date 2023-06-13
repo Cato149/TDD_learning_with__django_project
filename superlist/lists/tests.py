@@ -53,21 +53,28 @@ class ListAndItemModelTest(TestCase):
         
 class LisViewTest(TestCase):
     '''тест предсавления списка'''
-    
-    def test_uses_list_tmplates(self):
-        responce = self.client.get('/lists/the-only-one-list/')
-        self.assertTemplateUsed(responce, 'list.html')
 
-    def test_display_all_list_items(self):
-        '''тест отображает все элементы списка'''
+    def test_uses_list_template(self):
         list_ = List.objects.create()
-        Item.objects.create(text='itemey 1', list = list_)
-        Item.objects.create(text='itemey 2', list = list_)
+        response = self.client.get(f'/lists/{list_.id}/')
+        self.assertTemplateUsed(response, 'list.html')
 
-        responce = self.client.get('/lists/the-only-one-list/')
+    def test_display_all_list_items_for_that_list(self):
+        '''тест отображает все элементы ТОЛЬКО ДЛЯ ЭТОГО списка'''
+        correct_list = List.objects.create()
+        Item.objects.create(text='itemey 1', list = correct_list)
+        Item.objects.create(text='itemey 2', list = correct_list)
+        other_list = List.objects.create()
+        Item.objects.create(text='another itemey 1', list = other_list)
+        Item.objects.create(text='another itemey 2', list = other_list)
+
+
+        responce = self.client.get(f'/lists/{correct_list.id}/')
 
         self.assertContains(responce, 'itemey 1')
         self.assertContains(responce, 'itemey 2')
+        self.assertNotContains(responce, 'another itemey 1')
+        self.assertNotContains(responce, 'another itemey 2')
         
         
 class NewListTest(TestCase):
@@ -76,10 +83,11 @@ class NewListTest(TestCase):
     def test_redirect_after_POST(self):
         '''тест перенаправляет после POST запроса'''
         responce = self.client.post('/lists/new', data={"item_text": "a new list item"})
+        new_list = List.objects.first()
 
 #       self.assertEqual(responce.status_code, 302)
 #       self.assertRedirects(responce['location'], '/lists/the-only-one-list/')
-        self.assertRedirects(responce, '/lists/the-only-one-list/') #! <--- Заменяет две сткои выше
+        self.assertRedirects(responce, f'/lists/{new_list.id}/') #! <--- Заменяет две сткои выше
 
     def test_homepage_can_save_POST_request(self):
         '''тест может сохранять post-запрос'''
@@ -88,3 +96,40 @@ class NewListTest(TestCase):
         self.assertEqual(Item.objects.count(), 1)
         new_item = Item.objects.first()
         self.assertEqual(new_item.text, 'a new list item')
+        
+
+class NewItemTest(TestCase):
+    '''тест проверяет новой элемент списка'''
+    
+    def test_can_save_a_POST_request_to_an_a_existing_list(self):
+        other_list = List.objects.create()
+        correct_list = List.objects.create()
+        
+        self.client.post(
+            f'/lists/{correct_list.id}/add_item',
+            data={'item_text': 'A new item from an existing list'}
+        )
+        
+        self.assertEqual(Item.objects.count(), 1)
+        new_item = Item.objects.first()
+        self.assertEqual(new_item.text, 'A new item from an existing list')
+        self.assertEqual(new_item.list, correct_list)
+    
+    def test_can_redirect_to_list_view(self):
+        '''тест проверяет перенаправление на представление листа'''
+        other_list = List.objects.create()
+        correct_list = List.objects.create()
+        
+        response = self.client.post(
+            f'/lists/{correct_list.id}/add_item',
+            data={'item_text': 'A new item from an existing list'}
+        )
+        self.assertRedirects(response, f'/lists/{correct_list.id}/', )
+        
+    def test_passes_correct_list_to_template(self):
+        '''тест: представляется правильный шаблон списка'''
+        other_list = List.objects.create()
+        correct_list = List.objects.create()
+        response = self.client.get(f'/lists/{correct_list.id}/')
+        
+        self.assertEqual(response.context['list'], correct_list)
