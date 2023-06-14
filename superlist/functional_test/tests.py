@@ -26,7 +26,7 @@ class NewVisorTest(LiveServerTestCase):
             try:
                 table = self.browser.find_element(By.ID, 'id_list_table')
                 rows = table.find_elements(By.TAG_NAME, 'tr')
-                self.assertIn('1: Купить молоко', [row.text for row in rows])
+                self.assertIn(row_text, [row.text for row in rows])
                 return
             except (AssertionError, WebDriverException) as e:
                 if time.time() - start_time > MAX_WAIT:
@@ -117,6 +117,29 @@ class NewVisorTest(LiveServerTestCase):
         page_text = self.browser.find_element(By.TAG_NAME, 'body').text
         self.assertNotIn('Купить молоко', page_text)
         self.assertIn('Забрать Молли из садика', page_text)
+        
+    
+    def test_layout_and_styling(self):
+        '''тест макета и стиливого оформления'''
+        #Мэт открывает новоую страницу
+        self.browser.get(self.live_server_url)
+        self.browser.set_window_size(1024, 768)
+        
+        #он видит, что полое ввода аккуратно центрированно
+        inputbox = self.browser.find_element(By.ID, 'id_new_item')
+        self.assertAlmostEqual(
+            inputbox.location['x'] + inputbox.size['width'] / 2, 512, delta=10
+        )
+        
+        #Он начинает новый список и видит, что поле ввода тоже аккуратно расположено по центру
+        inputbox.send_keys('testing')
+        inputbox.send_keys(Keys.ENTER)
+        self.wait_for_row_in_list('1: testing')
+        inputbox = self.browser.find_element(By.ID, 'id_new_item')
+
+        self.assertAlmostEqual(
+            inputbox.location['x'] + inputbox.size['width'] / 2, 512, delta=10
+        )
         
         
 if __name__ == '__main__':
